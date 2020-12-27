@@ -5,11 +5,22 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    max-width: 1200px;
+    margin: auto;
 }
 
-#myCanvas {
-    background-color: white;
-    border: 1px solid black;
+canvas {
+    border-left: 5px solid red;
+    margin-left: 0;
+}
+
+#game {
+    display: none;
+}
+
+#people {
+    width: 300px;
+    height: 500px;
 }
 
 #source {
@@ -24,23 +35,45 @@ body {
     display: none;
 }
 
+#beach {
+    display: none;
+}
+
+#score {
+    display: none;
+    color: #FCFC40;
+}
+
 #alertStart {
     position: absolute;
-    top: 200px;
-    left: 420px;
+    top: 150px;
+    left: 400px;
     width: 400px;
     height: 300px;
     font-size: 20px;
-    background-color: rgb(178, 166, 206);
+    color: rgb(7, 252, 178);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    background-image: url('assets/pictures/startBackground.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 #start {
-    width: 100px;
+    width: 150px;
     height: 40px;
+    border-radius: 5px;
     font-size: 20px;
-    background-color: aquamarine;
+    background-color: #C70039;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#start:hover {
+    background-color: #c70038be;
 }

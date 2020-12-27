@@ -10,14 +10,21 @@
 
 <body>
     <h1>Canvas Game</h1>
-    <canvas id="myCanvas" width="800" height="500"></canvas>
-    <img src="boat.png" id="source">
-    <img src="bullet.png" id="bullet">
-    <img src="shark.png" id="shark">
+    <div id="game">
+        <img src="assets/pictures/people.jpg" id="people">
+        <canvas id="myCanvas" width="800" height="500"></canvas>
+    </div>
+    <img src="assets/pictures/boat.png" id="source">
+    <img src="assets/pictures/bullet.png" id="bullet">
+    <img src="assets/pictures/shark.png" id="shark">
+    <img src="assets/pictures/sea.jpg" id="beach">
     <div id="alertStart">
-        <h3>Welcome to Boat Shoot Game</h3>
+        <h3>Welcome to The Meg Game</h3>
+        <h4 id="score">Score: <span id="numScore">0</span></h4>
         <button type="button" onclick="startGame()" id="start">Start</button>
     </div>
+    <audio src="assets/audio/song.mp3" id="song"></audio>
+    <audio src="assets/audio/fire.mp3" id="fire"></audio>
 
     <script src="index.js "></script>
 </body>

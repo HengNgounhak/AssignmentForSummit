@@ -1,69 +1,140 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext('2d');
-var startBtn = document.getElementById("start");
-var alertStart = document.getElementById("alertStart")
+const startBtn = document.getElementById("start");
+const alertStart = document.getElementById("alertStart");
+const showScore = document.getElementById("score");
+const showNumScore = document.getElementById("numScore");
+const showBackground = document.getElementById("game");
+const song = document.getElementById("song");
+const fire = document.getElementById("fire");
 
 const imageShark = document.getElementById('shark');
 const imageBullet = document.getElementById('bullet');
-const imageShootBullet = document.getElementById('bullet');
+const imagearmBullet = document.getElementById('bullet');
+const imageShootingBullet = document.getElementById('bullet');
 const image = document.getElementById('source');
+const imagebeach = document.getElementById('beach');
 
-var timeShark = 3000;
-var numberBullet = 0;
-var isShoot = false;
+let timeShark = 2000; //Time for show a shark from array
+let numberBullet = 0;
+let score = 0;
+let isShoot = false;
+let gameOver = false;
 
-var allBullet = [];
+let allBullet = [];
+let sharks = [];
 
-const player = {
+let ship = {
     w: 80,
     h: 50,
     x: 20,
     y: 250,
-    speed: 10,
+    speed: 8,
     dx: 0,
     dy: 0
 };
 
-var bullet = {
+//for display bullet on the sea
+let bullet = {
     w: 20,
     h: 15,
     x: 50,
     y: 100,
 };
 
-var shootBullet = {
+//for display bullet on ship for shoot
+let armBullet = {
     w: 0,
     h: 15,
-    x: player.x + player.w,
-    y: player.y + player.h / 2,
-    speed: 20,
+    x: ship.x + ship.w,
+    y: ship.y + ship.h / 2,
 };
 
-var sharks = [];
+//to reset the value for restart game
+function init() {
+    numberBullet = 0;
+    score = 0;
+    gameOver = false;
 
+    allBullet = [];
+    sharks = [];
+
+    ship = {
+        w: 80,
+        h: 50,
+        x: 20,
+        y: 250,
+        speed: 4,
+        dx: 0,
+        dy: 0
+    };
+
+    bullet = {
+        w: 20,
+        h: 15,
+        x: 50,
+        y: 100,
+    };
+
+    armBullet = {
+        w: 0,
+        h: 15,
+        x: ship.x + ship.w,
+        y: ship.y + ship.h / 2,
+    };
+}
+
+//for show bullet on other place in the sea only 1/4 canvas width
 function respawn() {
     bullet.x = Math.round(Math.random() * ((canvas.width / 4) - bullet.w));
     bullet.y = Math.round(Math.random() * (canvas.height - bullet.h));
 }
 
+//for show bullet on ship where ever ship go
 function arm() {
-    shootBullet.x = player.x + player.w;
-    shootBullet.y = player.y + player.h / 2;
-    shootBullet.w = 20;
+    armBullet.x = ship.x + ship.w;
+    armBullet.y = ship.y + ship.h / 2;
+    armBullet.w = 20;
 }
 
-function drawShootBullet() {
-    ctx.drawImage(imageShootBullet, shootBullet.x, shootBullet.y, shootBullet.w, shootBullet.h);
+//for draw ship, armBullet, Bullet
+function drawarmBullet() {
+    ctx.drawImage(imagearmBullet, armBullet.x, armBullet.y, armBullet.w, armBullet.h);
 }
 
-function drawPlayer() {
-    ctx.drawImage(image, player.x, player.y, player.w, player.h);
+function drawship() {
+    ctx.drawImage(image, ship.x, ship.y, ship.w, ship.h);
 }
 
 function drawBullet() {
     ctx.drawImage(imageBullet, bullet.x, bullet.y, bullet.w, bullet.h);
 }
 
+//for draw each shoot bullet in array
+function makeShooting(x, y, w, h, s) {
+    return {
+        x: x,
+        y: y,
+        w: w,
+        h: h,
+        s: s,
+        draw: function() {
+            ctx.drawImage(imageShootingBullet, this.x, this.y, this.w, this.h)
+        }
+    }
+}
+
+//for create shoot bullet and add into array
+function shoot() {
+    var shootX = ship.x + ship.w;
+    var shootWight = 20;
+    var shootHight = 15;
+    var shootY = ship.y + ship.h / 2;
+    var shootSpeed = 20;
+    allBullet.push(makeShooting(shootX, shootY, shootWight, shootHight, shootSpeed));
+}
+
+//for draw each shark in array
 function makeShark(x, y, w, h, s) {
     return {
         x: x,
@@ -77,114 +148,70 @@ function makeShark(x, y, w, h, s) {
     }
 }
 
+//for create shark and add into array
 function shark() {
     var sharkX = canvas.width - 50;
     var sharkWight = 80;
     var sharkHight = 50;
     var sharkY = Math.round(Math.random() * (canvas.height - sharkHight));
-    var sharkSpeed = 5;
+    var sharkSpeed = 1;
     sharks.push(makeShark(sharkX, sharkY, sharkWight, sharkHight, sharkSpeed));
 }
 
+//clear the screen
 function clear() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+//for move ship 
 function newPos() {
-    player.x += player.dx;
-    player.y += player.dy;
+    ship.x += ship.dx;
+    ship.y += ship.dy;
 
     detectWalls();
 }
 
+//for not let ship move outside canvas
 function detectWalls() {
     // Left wall
-    if (player.x < 0) {
-        player.x = 0;
+    if (ship.x < 0) {
+        ship.x = 0;
     }
 
     // Right Wall
-    if (player.x + player.w > canvas.width) {
-        player.x = canvas.width - player.w;
+    if (ship.x + ship.w > canvas.width) {
+        ship.x = canvas.width - ship.w;
     }
 
     // Top wall
-    if (player.y < 0) {
-        player.y = 0;
+    if (ship.y < 0) {
+        ship.y = 0;
     }
 
     // Bottom Wall
-    if (player.y + player.h > canvas.height) {
-        player.y = canvas.height - player.h;
+    if (ship.y + ship.h > canvas.height) {
+        ship.y = canvas.height - ship.h;
     }
 }
 
-
-function update() {
-    clear();
-
-    drawPlayer();
-
-    drawBullet();
-
-    newPos();
-
-    requestAnimationFrame(update);
-
-    drawShootBullet();
-
-    if ((player.x <= bullet.x && bullet.x <= (player.x + player.w)) && (player.y <= bullet.y && bullet.y <= (player.y + player.h))) {
-
-        // Respawn target: delete old target, and random new target at other location
-        respawn();
-        // numberBullet += 1;
-        allBullet.push(arm());
-    }
-    // if(numberBullet > 0){
-    //     arm();
-    // }
-
-    if (allBullet.length > 0) {
-        // arm();
-        // for (var i = 0; i < allBullet.length; i = 0) {
-        //     arm();
-        // }
-    }
-
-    if (isShoot) {
-        shootBullet.x += shootBullet.speed;
-        if (shootBullet.x == (canvas.width)) {
-            shootBullet.w = 0;
-        }
-    }
-
-    sharks.forEach(function(shark) {
-        shark.x -= shark.s;
-        shark.draw();
-        if (shark.x == 0) {
-            sharks.pop(makeShark);
-        }
-    })
-
-    text();
-}
-
+//for move play when tap keys
 function moveUp() {
-    player.dy = -player.speed;
+    ship.dy = -ship.speed;
 }
 
 function moveDown() {
-    player.dy = player.speed;
+    ship.dy = ship.speed;
 }
 
 function moveRight() {
-    player.dx = player.speed;
+    ship.dx = ship.speed;
 }
 
 function moveLeft() {
-    player.dx = -player.speed;
+    ship.dx = -ship.speed;
 }
 
+//for detect keys for move
 function keyDown(e) {
     if (e.key === 'ArrowRight' || e.key === 'Right') {
         moveRight();
@@ -208,39 +235,159 @@ function keyUp(e) {
         e.key == 'Down' ||
         e.key == 'ArrowDown'
     ) {
-        player.dx = 0;
-        player.dy = 0;
+        ship.dx = 0;
+        ship.dy = 0;
+    }
+}
+//for detect ship and bullet touch each other
+function touchAbullet() {
+    const touchBullet = Math.hypot(ship.x - bullet.x, ship.y - bullet.y)
+    if ((touchBullet - ship.w * 0.8 - bullet.w / 2) < 1) {
+        respawn();
+        numberBullet += 1;
+    }
+
+}
+
+//for shoot the bullet
+function startShoot() {
+    if (isShoot) {
+        shoot();
+        fire.play();
+        isShoot = false;
+    }
+
+    allBullet.forEach(function(aBullet) {
+        aBullet.x += aBullet.s;
+        aBullet.draw();
+        if (aBullet.x == canvas.width) {
+            allBullet.shift(makeShooting);
+        }
+    })
+}
+
+//draw shark
+function callShark() {
+    sharks.forEach(function(shark) {
+        song.play();
+        shark.x = shark.x - shark.s;
+        shark.draw();
+        if (shark.x < 0) {
+            gameOver = true;
+        }
+    })
+}
+
+//detect shark and bullet - shark and ship
+function touch() {
+    sharks.forEach(function(shark, j) {
+        const touchShip = Math.hypot(ship.x - shark.x, ship.y - shark.y)
+        if (touchShip - ship.w / 2 - shark.w / 2 < 1) {
+            gameOver = true;
+        }
+
+        allBullet.forEach(function(bullet, i) {
+            const touch = Math.hypot(bullet.x - shark.x, bullet.y - shark.y)
+            if (touch - bullet.w / 2 - shark.w / 2 < 1) {
+                setTimeout(() => {
+                    allBullet.splice(i, 1);
+                    sharks.splice(j, 1);
+                }, 0);
+
+                score += 1;
+            }
+        })
+    })
+}
+
+let id;
+//for draw or update every thing in canvas every second
+function update() {
+
+    clear();
+
+    ctx.drawImage(imagebeach, 0, 0, canvas.width, canvas.height);
+
+    drawship();
+
+    drawBullet();
+
+    newPos();
+
+    id = requestAnimationFrame(update);
+
+    drawarmBullet();
+
+    touchAbullet();
+
+    if (numberBullet > 0) {
+        arm();
+    } else {
+        armBullet.w = 0;
+    }
+
+    startShoot();
+
+    callShark();
+
+    touch();
+
+    text();
+
+    if (gameOver) {
+        // clear();
+        cancelAnimationFrame(id);
+        showBackground.style.display = 'none';
+        alertStart.style.display = 'flex';
+        showScore.style.display = 'inline';
+        showNumScore.innerHTML = score;
+        startBtn.innerHTML = 'Play Again';
     }
 }
 
+//for start game when tap start or play again
 function startGame() {
     alertStart.style.display = 'none';
+    showBackground.style.display = 'inline';
+
+    init();
     update();
+    song.play();
 }
 
-setInterval(shark, timeShark);
-// setTimeout(shark, 1000);
+//for shark to get out a lot 
+if (score > 10) {
+    timeShark = 1000;
+}
 
+//time for shark get out
+setInterval(shark, timeShark);
+
+//listener for key tap
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
-
 document.addEventListener('keydown', function(event) {
     event.preventDefault();
     if (event.keyCode == 32) {
-        // if (numberBullet < 1) {
-        //     numberBullet += 1;
-        // }
+        if (numberBullet > 0) {
+            isShoot = true;
+        }
 
-        isShoot = true;
-        // numberBullet -= 1;
-        allBullet.length -= 1;
+        if (numberBullet < 1) {
+            numberBullet += 1;
+        }
 
+        numberBullet -= 1;
     }
 });
 
-//Number of bullet text
+//for show text on screen
 function text() {
     ctx.fillStyle = '#000';
     ctx.font = '12px sans-serif';
     ctx.fillText("Bullet: " + numberBullet, 10, 20);
+
+    ctx.fillStyle = '#000';
+    ctx.font = '12px sans-serif';
+    ctx.fillText("Score: " + score, canvas.width - 60, 20);
 }
